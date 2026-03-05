@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Banking Tracker - ARSHAD</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        :root { --blue: #0046ad; --gold: #ffd700; --dark: #1a1a1a; }
+        body { font-family: -apple-system, sans-serif; background: #f0f2f5; margin: 0; padding: 10px; }
+        .card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 15px; }
+        h2 { color: var(--blue); margin: 0; font-size: 20px; text-align: center; }
+        .row { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 10px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
+        label { font-size: 11px; font-weight: bold; color: #666; display: block; margin-bottom: 5px; }
+        input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; }
+        .btn-add { background: #e3f2fd; color: var(--blue); }
+        .btn-pdf { background: var(--blue); color: white; }
+        .btn-wa { background: #25D366; color: white; }
+        .summary-box { background: var(--dark); color: white; padding: 15px; border-radius: 12px; margin: 20px 0; }
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .dev-footer { text-align: center; font-size: 12px; color: #888; margin-top: 30px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>DAILY BANKING REPORT</h2>
+    <input type="date" id="repDate" style="text-align:center; border:none; color:var(--blue); font-weight:bold; margin-top:10px;">
+</div>
+
+<div id="entryContainer"></div>
+
+<button class="btn btn-add" onclick="addRow()">+ ADD NEW SHOP ENTRY</button>
+
+<div class="summary-box">
+    <div class="summary-row"><span>Total Sales:</span> <span id="totSales">$0.00</span></div>
+    <div class="summary-row"><span>Total Banked:</span> <span id="totBanked">$0.00</span></div>
+    <hr style="border-color: #444;">
+    <div class="summary-row" style="color:var(--gold); font-weight:bold;"><span>Cash in Hand:</span> <span id="totDiff">$0.00</span></div>
+</div>
+
+<button class="btn btn-pdf" onclick="generatePDF()">DOWNLOAD PDF</button>
+<button class="btn btn-wa" onclick="sendWA()">SEND TO ARSHAD (WHATSAPP)</button>
+
+<div class="dev-footer">
+    System Managed by: <b>ARSHAD</b><br>
+    WhatsApp: <b>+243 902 702 275</b>
+</div>
+
+<script>
+    document.getElementById('repDate').valueAsDate = new Date();
+
+    function addRow() {
+        const div = document.createElement('div');
+        div.className = 'row';
+        div.innerHTML = `
+            <div><label>SHOP NAME</label><input type="text" class="sName" placeholder="Shop Name"></div>
+            <div><label>SALES ($)</label><input type="number" class="sSales" value="0" oninput="calc()"></div>
+            <div><label>BANKED ($)</label><input type="number" class="sBank" value="0" oninput="calc()"></div>
+        `;
+        document.getElementById('entryContainer').appendChild(div);
+    }
+
+    function calc() {
+        let ts = 0, tb = 0;
+        document.querySelectorAll('.row').forEach(r => {
+            ts += parseFloat(r.querySelector('.sSales').value) || 0;
+            tb += parseFloat(r.querySelector('.sBank').value) || 0;
+        });
+        document.getElementById('totSales').innerText = "$" + ts.toFixed(2);
+        document.getElementById('totBanked').innerText = "$" + tb.toFixed(2);
+        document.getElementById('totDiff').innerText = "$" + (ts - tb).toFixed(2);
+    }
+
+    function sendWA() {
+        const date = document.getElementById('repDate').value;
+        let msg = `*DAILY BANKING REPORT (${date})*%0A%0A`;
+        document.querySelectorAll('.row').forEach(r => {
+            const name = r.querySelector('.sName').value || "Unnamed Shop";
+            const sale = r.querySelector('.sSales').value;
+            const bank = r.querySelector('.sBank').value;
+            msg += `*${name}*%0A- Sales: $${sale}%0A- Bank: $${bank}%0A%0A`;
+        });
+        msg += `*TOTAL SALES:* ${document.getElementById('totSales').innerText}%0A`;
+        msg += `*TOTAL BANKED:* ${document.getElementById('totBanked').innerText}%0A`;
+        msg += `*CASH REMAINING:* ${document.getElementById('totDiff').innerText}`;
+        
+        window.open(`https://wa.me/243902702275?text=${msg}`);
+    }
+
+    function generatePDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const date = document.getElementById('repDate').value;
+
+        doc.setFontSize(20);
+        doc.setTextColor(0, 70, 173);
+        doc.text("BANKING DEPOSIT REPORT", 105, 20, { align: "center" });
+        
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text("Report Date: " + date, 14, 30);
+
+        let data = [];
+        document.querySelectorAll('.row').forEach(r => {
+            data.push([
+                r.querySelector('.sName').value || "-",
+                "$" + r.querySelector('.sSales').value,
+                "$" + r.querySelector('.sBank').value,
+                "$" + (parseFloat(r.querySelector('.sSales').value) - parseFloat(r.querySelector('.sBank').value)).toFixed(2)
+            ]);
+        });
+
+        doc.autoTable({
+            startY: 40,
+            head: [['Shop Name', 'Total Sales', 'Bank Deposited', 'Difference']],
+            body: data,
+            theme: 'striped',
+            headStyles: { fillColor: [0, 70, 173] }
+        });
+
+        const finalY = doc.lastAutoTable.finalY + 10;
+        doc.setFontSize(12);
+        doc.text(`Total Banked Today: ${document.getElementById('totBanked').innerText}`, 14, finalY);
+        
+        doc.setFontSize(9);
+        doc.text("Report Managed by ARSHAD | +243 902 702 275", 105, 290, { align: "center" });
+
+        const pdfBlob = doc.output('blob');
+        const url = URL.createObjectURL(pdfBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Banking_Report_${date}.pdf`;
+        link.click();
+    }
+
+    // Start with 3 empty rows
+    addRow(); addRow(); addRow();
+</script>
+</body>
+</html>
+
