@@ -105,28 +105,52 @@
     function generatePDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-        const date = document.getElementById('repDate').value;
+        
+        // Date handling
+        const dateRaw = document.getElementById('repDate').value;
+        const dateObj = new Date(dateRaw);
+        const formattedDate = dateObj.toLocaleDateString('fr-FR'); // Format: DD/MM/YYYY
+
+        // Header
         doc.setFontSize(20);
         doc.setTextColor(0, 70, 173);
         doc.text("BANKING DEPOSIT REPORT", 105, 20, { align: "center" });
+        
+        // Date Line (THE FIX)
+        doc.setFontSize(12);
+        doc.setTextColor(100);
+        doc.text(`Date du Rapport: ${formattedDate}`, 14, 30);
+
         let data = [];
         document.querySelectorAll('.row').forEach(r => {
+            const sale = parseFloat(r.querySelector('.sSales').value) || 0;
+            const bank = parseFloat(r.querySelector('.sBank').value) || 0;
             data.push([
-                r.querySelector('.sName').value || "-",
-                "$" + r.querySelector('.sSales').value,
-                "$" + r.querySelector('.sBank').value,
-                "$" + (parseFloat(r.querySelector('.sSales').value) - parseFloat(r.querySelector('.sBank').value)).toFixed(2)
+                (r.querySelector('.sName').value || "-").toUpperCase(),
+                "$" + sale.toFixed(2),
+                "$" + bank.toFixed(2),
+                "$" + (sale - bank).toFixed(2)
             ]);
         });
+
         doc.autoTable({
             startY: 40,
             head: [['Shop Name', 'Total Sales', 'Bank Deposited', 'Difference']],
             body: data,
             theme: 'striped',
-            headStyles: { fillColor: [0, 70, 173] }
+            headStyles: { fillColor: [0, 70, 173] },
+            styles: { fontSize: 10 }
         });
-        doc.text(`Total Banked: ${document.getElementById('totBanked').innerText}`, 14, doc.lastAutoTable.finalY + 10);
-        doc.save(`Banking_Report_${date}.pdf`);
+
+        // Totals Footer in PDF
+        let finalY = doc.lastAutoTable.finalY + 15;
+        doc.setFontSize(12);
+        doc.setTextColor(0);
+        doc.text(`Total Banked: ${document.getElementById('totBanked').innerText}`, 14, finalY);
+        doc.setTextColor(211, 47, 47); // Red for remaining cash
+        doc.text(`Cash in Hand: ${document.getElementById('totDiff').innerText}`, 14, finalY + 8);
+
+        doc.save(`Banking_Report_${dateRaw}.pdf`);
     }
 
     // Start with 3 empty rows
