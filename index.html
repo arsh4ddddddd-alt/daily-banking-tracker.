@@ -39,8 +39,6 @@
     <div class="summary-box">
         <div class="summary-row"><span>Total Sales:</span> <span id="totSales">$0.00</span></div>
         <div class="summary-row"><span>Total Banked:</span> <span id="totBanked">$0.00</span></div>
-        <hr style="border-color: #444;">
-        <div class="summary-row" style="color:var(--gold); font-weight:bold;"><span>Cash in Hand:</span> <span id="totDiff">$0.00</span></div>
     </div>
 
     <div class="card">
@@ -79,7 +77,6 @@
         });
         document.getElementById('totSales').innerText = "$" + ts.toFixed(2);
         document.getElementById('totBanked').innerText = "$" + tb.toFixed(2);
-        document.getElementById('totDiff').innerText = "$" + (ts - tb).toFixed(2);
     }
 
     function sendWA() {
@@ -96,8 +93,7 @@
             msg += `*${name}*%0A- Sales: $${sale}%0A- Bank: $${bank}%0A%0A`;
         });
         msg += `*TOTAL SALES:* ${document.getElementById('totSales').innerText}%0A`;
-        msg += `*TOTAL BANKED:* ${document.getElementById('totBanked').innerText}%0A`;
-        msg += `*CASH REMAINING:* ${document.getElementById('totDiff').innerText}`;
+        msg += `*TOTAL BANKED:* ${document.getElementById('totBanked').innerText}`;
         
         window.open(`https://wa.me/${targetNumber}?text=${msg}`);
     }
@@ -106,17 +102,14 @@
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
         
-        // Date handling
         const dateRaw = document.getElementById('repDate').value;
         const dateObj = new Date(dateRaw);
-        const formattedDate = dateObj.toLocaleDateString('fr-FR'); // Format: DD/MM/YYYY
+        const formattedDate = dateObj.toLocaleDateString('fr-FR');
 
-        // Header
         doc.setFontSize(20);
         doc.setTextColor(0, 70, 173);
         doc.text("BANKING DEPOSIT REPORT", 105, 20, { align: "center" });
         
-        // Date Line (THE FIX)
         doc.setFontSize(12);
         doc.setTextColor(100);
         doc.text(`Date du Rapport: ${formattedDate}`, 14, 30);
@@ -128,32 +121,28 @@
             data.push([
                 (r.querySelector('.sName').value || "-").toUpperCase(),
                 "$" + sale.toFixed(2),
-                "$" + bank.toFixed(2),
-                "$" + (sale - bank).toFixed(2)
+                "$" + bank.toFixed(2)
             ]);
         });
 
         doc.autoTable({
             startY: 40,
-            head: [['Shop Name', 'Total Sales', 'Bank Deposited', 'Difference']],
+            head: [['Shop Name', 'Total Sales', 'Bank Deposited']],
             body: data,
             theme: 'striped',
             headStyles: { fillColor: [0, 70, 173] },
             styles: { fontSize: 10 }
         });
 
-        // Totals Footer in PDF
         let finalY = doc.lastAutoTable.finalY + 15;
         doc.setFontSize(12);
         doc.setTextColor(0);
-        doc.text(`Total Banked: ${document.getElementById('totBanked').innerText}`, 14, finalY);
-        doc.setTextColor(211, 47, 47); // Red for remaining cash
-        doc.text(`Cash in Hand: ${document.getElementById('totDiff').innerText}`, 14, finalY + 8);
+        doc.text(`Total Sales: ${document.getElementById('totSales').innerText}`, 14, finalY);
+        doc.text(`Total Banked: ${document.getElementById('totBanked').innerText}`, 14, finalY + 8);
 
         doc.save(`Banking_Report_${dateRaw}.pdf`);
     }
 
-    // Start with 3 empty rows
     addRow(); addRow(); addRow();
 </script>
 </body>
