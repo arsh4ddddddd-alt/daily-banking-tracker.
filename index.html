@@ -114,14 +114,20 @@
         doc.setTextColor(100);
         doc.text(`Date: ${date}`, 14, 22);
 
-        // Kinshasa Table
+        // --- KINSHASA TABLE ---
         doc.setTextColor(25, 118, 210);
         doc.setFont("helvetica", "bold");
         doc.text("CITY: KINSHASA", 14, 32);
         
         let kinData = [];
+        let kinSalesSum = 0;
+        let kinBankSum = 0;
         document.querySelectorAll('#kinContainer .row').forEach(r => {
-            kinData.push([r.querySelector('.sName').value, "$" + r.querySelector('.sSales').value, "$" + r.querySelector('.sBank').value]);
+            let s = parseFloat(r.querySelector('.sSales').value) || 0;
+            let b = parseFloat(r.querySelector('.sBank').value) || 0;
+            kinSalesSum += s;
+            kinBankSum += b;
+            kinData.push([r.querySelector('.sName').value, "$" + s.toFixed(2), "$" + b.toFixed(2)]);
         });
 
         doc.autoTable({
@@ -132,14 +138,26 @@
             theme: 'striped'
         });
 
-        // Katanga Table
-        let nextY = doc.lastAutoTable.finalY + 15;
+        let nextY = doc.lastAutoTable.finalY + 8;
+        doc.setFontSize(10);
+        doc.setTextColor(50);
+        doc.text(`KINSHASA Subtotal - Sales: $${kinSalesSum.toFixed(2)} | Banked: $${kinBankSum.toFixed(2)}`, 14, nextY);
+
+        // --- KATANGA TABLE ---
+        nextY += 12;
+        doc.setFontSize(11);
         doc.setTextColor(245, 124, 0);
         doc.text("CITY: KATANGA", 14, nextY);
 
         let katData = [];
+        let katSalesSum = 0;
+        let katBankSum = 0;
         document.querySelectorAll('#katContainer .row').forEach(r => {
-            katData.push([r.querySelector('.sName').value, "$" + r.querySelector('.sSales').value, "$" + r.querySelector('.sBank').value]);
+            let s = parseFloat(r.querySelector('.sSales').value) || 0;
+            let b = parseFloat(r.querySelector('.sBank').value) || 0;
+            katSalesSum += s;
+            katBankSum += b;
+            katData.push([r.querySelector('.sName').value, "$" + s.toFixed(2), "$" + b.toFixed(2)]);
         });
 
         doc.autoTable({
@@ -150,10 +168,16 @@
             theme: 'striped'
         });
 
-        // Final Summary
-        let finalY = doc.lastAutoTable.finalY + 15;
+        nextY = doc.lastAutoTable.finalY + 8;
+        doc.setFontSize(10);
+        doc.setTextColor(50);
+        doc.text(`KATANGA Subtotal - Sales: $${katSalesSum.toFixed(2)} | Banked: $${katBankSum.toFixed(2)}`, 14, nextY);
+
+        // --- FINAL GRAND TOTAL ---
+        let finalY = nextY + 15;
         doc.setFontSize(14);
-        doc.setTextColor(0);
+        doc.setTextColor(0, 70, 173);
+        doc.setFont("helvetica", "bold");
         doc.text(`GRAND TOTAL SALES: ${document.getElementById('totSales').innerText}`, 14, finalY);
         doc.text(`GRAND TOTAL BANKED: ${document.getElementById('totBanked').innerText}`, 14, finalY + 8);
 
