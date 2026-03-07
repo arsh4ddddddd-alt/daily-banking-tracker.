@@ -2,26 +2,34 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Banking Tracker - ARSHAD</title>
+    <title>Banking Tracker - ARSHAD Edition</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <style>
-        :root { --blue: #0046ad; --gold: #ffd700; --dark: #1a1a1a; }
-        body { font-family: -apple-system, sans-serif; background: #f0f2f5; margin: 0; padding: 10px; }
+        :root { --blue: #0046ad; --dark: #1a1a1a; --kinshasa: #e3f2fd; --lubumbashi: #fff3e0; }
+        body { font-family: -apple-system, sans-serif; background: #f0f2f5; margin: 0; padding: 10px; padding-bottom: 50px; }
         
         .card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 15px; }
-        h2 { color: var(--blue); margin: 0; font-size: 20px; text-align: center; }
-        .row { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 10px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
-        label { font-size: 11px; font-weight: bold; color: #666; display: block; margin-bottom: 5px; }
-        input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+        h2 { color: var(--blue); margin: 0; font-size: 20px; text-align: center; text-transform: uppercase; }
+        
+        .city-section { margin-top: 20px; border-radius: 12px; padding: 10px; }
+        .city-kin { background: var(--kinshasa); border-left: 5px solid #1976d2; }
+        .city-lub { background: var(--lubumbashi); border-left: 5px solid #f57c00; }
+        .city-title { font-weight: bold; font-size: 14px; margin-bottom: 10px; color: #333; display: flex; justify-content: space-between; }
+
+        .row { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 8px; margin-bottom: 10px; background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        label { font-size: 10px; font-weight: bold; color: #666; display: block; margin-bottom: 3px; text-transform: uppercase; }
+        input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; box-sizing: border-box; }
+        .sName { background: #f9f9f9; font-weight: bold; color: #333; }
+
         .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; }
-        .btn-add { background: #e3f2fd; color: var(--blue); }
-        .btn-pdf { background: var(--blue); color: white; }
+        .btn-pdf { background: var(--blue); color: white; margin-top: 20px; }
         .btn-wa { background: #25D366; color: white; }
+        
         .summary-box { background: var(--dark); color: white; padding: 15px; border-radius: 12px; margin: 20px 0; }
-        .summary-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
-        .dev-footer { text-align: center; font-size: 12px; color: #888; margin-top: 30px; }
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 15px; }
+        .dev-footer { text-align: center; font-size: 11px; color: #888; margin-top: 20px; line-height: 1.5; }
     </style>
 </head>
 <body>
@@ -29,121 +37,151 @@
 <div id="mainApp">
     <div class="card">
         <h2>DAILY BANKING REPORT</h2>
-        <input type="date" id="repDate" style="text-align:center; border:none; color:var(--blue); font-weight:bold; margin-top:10px;">
+        <input type="date" id="repDate" style="width:100%; text-align:center; border:none; color:var(--blue); font-weight:bold; margin-top:10px; font-size: 18px;">
     </div>
 
-    <div id="entryContainer"></div>
+    <div class="city-section city-kin">
+        <div class="city-title"><span>📍 KINSHASA</span></div>
+        <div id="kinContainer"></div>
+    </div>
 
-    <button class="btn btn-add" onclick="addRow()">+ ADD NEW SHOP ENTRY</button>
+    <div class="city-section city-lub">
+        <div class="city-title"><span>📍 LUBUMBASHI</span></div>
+        <div id="lubContainer"></div>
+    </div>
 
     <div class="summary-box">
-        <div class="summary-row"><span>Total Sales:</span> <span id="totSales">$0.00</span></div>
-        <div class="summary-row"><span>Total Banked:</span> <span id="totBanked">$0.00</span></div>
+        <div class="summary-row"><span>Grand Total Sales:</span> <span id="totSales">$0.00</span></div>
+        <div class="summary-row"><span>Grand Total Banked:</span> <span id="totBanked">$0.00</span></div>
     </div>
 
     <div class="card">
-        <label>SEND REPORT TO (WhatsApp Number):</label>
-        <input type="text" id="waNumber" placeholder="Example: 243902702275" value="243902702275">
+        <label>SEND TO WHATSAPP:</label>
+        <input type="text" id="waNumber" value="243902702275">
         <button class="btn btn-wa" onclick="sendWA()">SEND VIA WHATSAPP</button>
     </div>
 
-    <button class="btn btn-pdf" style="margin-bottom:20px;" onclick="generatePDF()">DOWNLOAD PDF</button>
+    <button class="btn btn-pdf" onclick="generatePDF()">DOWNLOAD PDF REPORT</button>
 
     <div class="dev-footer">
         System Developed by: <b>ARSHAD</b><br>
-        Contact: +243 902 702 275
+        Kinshasa & Lubumbashi Operations
     </div>
 </div>
 
 <script>
-    document.getElementById('repDate').valueAsDate = new Date();
+    const kinShops = ["BOTOUR", "UPN (UPAINE)", "VICTOIRE", "MASINA", "MATADI"];
+    const lubShops = ["KAPENDA 1", "KAPENDA 2", "LIPAMU", "MATSHIPISHA", "LIKASI", "KOLWEZI"];
 
-    function addRow() {
+    function init() {
+        document.getElementById('repDate').valueAsDate = new Date();
+        const kinDiv = document.getElementById('kinContainer');
+        const lubDiv = document.getElementById('lubContainer');
+
+        kinShops.forEach(name => kinDiv.appendChild(createRow(name)));
+        lubShops.forEach(name => lubDiv.appendChild(createRow(name)));
+        calc();
+    }
+
+    function createRow(name) {
         const div = document.createElement('div');
         div.className = 'row';
         div.innerHTML = `
-            <div><label>SHOP NAME</label><input type="text" class="sName" placeholder="Shop Name"></div>
-            <div><label>SALES ($)</label><input type="number" class="sSales" value="0" oninput="calc()"></div>
-            <div><label>BANKED ($)</label><input type="number" class="sBank" value="0" oninput="calc()"></div>
+            <div><label>Shop</label><input type="text" class="sName" value="${name}" readonly></div>
+            <div><label>Sales ($)</label><input type="number" class="sSales" value="0" oninput="calc()"></div>
+            <div><label>Banked ($)</label><input type="number" class="sBank" value="0" oninput="calc()"></div>
         `;
-        document.getElementById('entryContainer').appendChild(div);
+        return div;
     }
 
     function calc() {
         let ts = 0, tb = 0;
-        document.querySelectorAll('.row').forEach(r => {
-            ts += parseFloat(r.querySelector('.sSales').value) || 0;
-            tb += parseFloat(r.querySelector('.sBank').value) || 0;
-        });
+        document.querySelectorAll('.sSales').forEach(i => ts += parseFloat(i.value) || 0);
+        document.querySelectorAll('.sBank').forEach(i => tb += parseFloat(i.value) || 0);
         document.getElementById('totSales').innerText = "$" + ts.toFixed(2);
         document.getElementById('totBanked').innerText = "$" + tb.toFixed(2);
-    }
-
-    function sendWA() {
-        const date = document.getElementById('repDate').value;
-        const targetNumber = document.getElementById('waNumber').value.replace(/\D/g,'');
-        
-        if(!targetNumber) return alert("Please enter a WhatsApp number first!");
-
-        let msg = `*DAILY BANKING REPORT (${date})*%0A%0A`;
-        document.querySelectorAll('.row').forEach(r => {
-            const name = r.querySelector('.sName').value || "Unnamed Shop";
-            const sale = r.querySelector('.sSales').value;
-            const bank = r.querySelector('.sBank').value;
-            msg += `*${name}*%0A- Sales: $${sale}%0A- Bank: $${bank}%0A%0A`;
-        });
-        msg += `*TOTAL SALES:* ${document.getElementById('totSales').innerText}%0A`;
-        msg += `*TOTAL BANKED:* ${document.getElementById('totBanked').innerText}`;
-        
-        window.open(`https://wa.me/${targetNumber}?text=${msg}`);
     }
 
     function generatePDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-        
-        const dateRaw = document.getElementById('repDate').value;
-        const dateObj = new Date(dateRaw);
-        const formattedDate = dateObj.toLocaleDateString('fr-FR');
+        const date = document.getElementById('repDate').value;
 
-        doc.setFontSize(20);
+        // Header
+        doc.setFontSize(18);
         doc.setTextColor(0, 70, 173);
-        doc.text("BANKING DEPOSIT REPORT", 105, 20, { align: "center" });
-        
-        doc.setFontSize(12);
+        doc.text("DAILY BANKING DEPOSIT REPORT", 105, 15, { align: "center" });
+        doc.setFontSize(11);
         doc.setTextColor(100);
-        doc.text(`Date du Rapport: ${formattedDate}`, 14, 30);
+        doc.text(`Date: ${date}`, 14, 22);
 
-        let data = [];
-        document.querySelectorAll('.row').forEach(r => {
-            const sale = parseFloat(r.querySelector('.sSales').value) || 0;
-            const bank = parseFloat(r.querySelector('.sBank').value) || 0;
-            data.push([
-                (r.querySelector('.sName').value || "-").toUpperCase(),
-                "$" + sale.toFixed(2),
-                "$" + bank.toFixed(2)
-            ]);
+        // Kinshasa Table
+        doc.setTextColor(25, 118, 210);
+        doc.setFont("helvetica", "bold");
+        doc.text("CITY: KINSHASA", 14, 32);
+        
+        let kinData = [];
+        document.querySelectorAll('#kinContainer .row').forEach(r => {
+            kinData.push([r.querySelector('.sName').value, "$" + r.querySelector('.sSales').value, "$" + r.querySelector('.sBank').value]);
         });
 
         doc.autoTable({
-            startY: 40,
-            head: [['Shop Name', 'Total Sales', 'Bank Deposited']],
-            body: data,
-            theme: 'striped',
-            headStyles: { fillColor: [0, 70, 173] },
-            styles: { fontSize: 10 }
+            startY: 35,
+            head: [['Shop Name', 'Sales', 'Banked']],
+            body: kinData,
+            headStyles: { fillColor: [25, 118, 210] },
+            theme: 'striped'
         });
 
-        let finalY = doc.lastAutoTable.finalY + 15;
-        doc.setFontSize(12);
-        doc.setTextColor(0);
-        doc.text(`Total Sales: ${document.getElementById('totSales').innerText}`, 14, finalY);
-        doc.text(`Total Banked: ${document.getElementById('totBanked').innerText}`, 14, finalY + 8);
+        // Lubumbashi Table
+        let nextY = doc.lastAutoTable.finalY + 15;
+        doc.setTextColor(245, 124, 0);
+        doc.text("CITY: LUBUMBASHI", 14, nextY);
 
-        doc.save(`Banking_Report_${dateRaw}.pdf`);
+        let lubData = [];
+        document.querySelectorAll('#lubContainer .row').forEach(r => {
+            lubData.push([r.querySelector('.sName').value, "$" + r.querySelector('.sSales').value, "$" + r.querySelector('.sBank').value]);
+        });
+
+        doc.autoTable({
+            startY: nextY + 3,
+            head: [['Shop Name', 'Sales', 'Banked']],
+            body: lubData,
+            headStyles: { fillColor: [245, 124, 0] },
+            theme: 'striped'
+        });
+
+        // Final Summary
+        let finalY = doc.lastAutoTable.finalY + 15;
+        doc.setFontSize(14);
+        doc.setTextColor(0);
+        doc.text(`GRAND TOTAL SALES: ${document.getElementById('totSales').innerText}`, 14, finalY);
+        doc.text(`GRAND TOTAL BANKED: ${document.getElementById('totBanked').innerText}`, 14, finalY + 8);
+
+        doc.save(`Banking_Report_${date}.pdf`);
     }
 
-    addRow(); addRow(); addRow();
+    function sendWA() {
+        const date = document.getElementById('repDate').value;
+        const target = document.getElementById('waNumber').value.replace(/\D/g,'');
+        let msg = `*DAILY BANKING REPORT (${date})*%0A%0A*--- KINSHASA ---*%0A`;
+        
+        document.querySelectorAll('#kinContainer .row').forEach(r => {
+            msg += `${r.querySelector('.sName').value}: S:$${r.querySelector('.sSales').value} / B:$${r.querySelector('.sBank').value}%0A`;
+        });
+
+        msg += `%0A*--- LUBUMBASHI ---*%0A`;
+        document.querySelectorAll('#lubContainer .row').forEach(r => {
+            msg += `${r.querySelector('.sName').value}: S:$${r.querySelector('.sSales').value} / B:$${r.querySelector('.sBank').value}%0A`;
+        });
+
+        msg += `%0A*GRAND TOTAL SALES:* ${document.getElementById('totSales').innerText}`;
+        msg += `%0A*GRAND TOTAL BANKED:* ${document.getElementById('totBanked').innerText}`;
+        
+        window.open(`https://wa.me/${target}?text=${msg}`);
+    }
+
+    init();
 </script>
 </body>
 </html>
