@@ -7,7 +7,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <style>
-        :root { --blue: #0046ad; --dark: #1a1a1a; --kinshasa: #e3f2fd; --lubumbashi: #fff3e0; }
+        :root { --blue: #0046ad; --dark: #1a1a1a; --kinshasa: #e3f2fd; --katanga: #fff3e0; }
         body { font-family: -apple-system, sans-serif; background: #f0f2f5; margin: 0; padding: 10px; padding-bottom: 50px; }
         
         .card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 15px; }
@@ -15,7 +15,7 @@
         
         .city-section { margin-top: 20px; border-radius: 12px; padding: 10px; }
         .city-kin { background: var(--kinshasa); border-left: 5px solid #1976d2; }
-        .city-lub { background: var(--lubumbashi); border-left: 5px solid #f57c00; }
+        .city-kat { background: var(--katanga); border-left: 5px solid #f57c00; }
         .city-title { font-weight: bold; font-size: 14px; margin-bottom: 10px; color: #333; display: flex; justify-content: space-between; }
 
         .row { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 8px; margin-bottom: 10px; background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
@@ -45,9 +45,9 @@
         <div id="kinContainer"></div>
     </div>
 
-    <div class="city-section city-lub">
-        <div class="city-title"><span>📍 LUBUMBASHI</span></div>
-        <div id="lubContainer"></div>
+    <div class="city-section city-kat">
+        <div class="city-title"><span>📍 KATANGA</span></div>
+        <div id="katContainer"></div>
     </div>
 
     <div class="summary-box">
@@ -65,21 +65,21 @@
 
     <div class="dev-footer">
         System Developed by: <b>ARSHAD</b><br>
-        Kinshasa & Lubumbashi Operations
+        Kinshasa & Katanga Operations
     </div>
 </div>
 
 <script>
     const kinShops = ["BOTOUR", "UPN (UPAINE)", "VICTOIRE", "MASINA", "MATADI"];
-    const lubShops = ["KAPENDA 1", "KAPENDA 2", "LIPAMU", "MATSHIPISHA", "LIKASI", "KOLWEZI"];
+    const katShops = ["KAPENDA 1", "KAPENDA 2", "LIPAMU", "MATSHIPISHA", "LIKASI", "KOLWEZI"];
 
     function init() {
         document.getElementById('repDate').valueAsDate = new Date();
         const kinDiv = document.getElementById('kinContainer');
-        const lubDiv = document.getElementById('lubContainer');
+        const katDiv = document.getElementById('katContainer');
 
         kinShops.forEach(name => kinDiv.appendChild(createRow(name)));
-        lubShops.forEach(name => lubDiv.appendChild(createRow(name)));
+        katShops.forEach(name => katDiv.appendChild(createRow(name)));
         calc();
     }
 
@@ -107,7 +107,6 @@
         const doc = new jsPDF();
         const date = document.getElementById('repDate').value;
 
-        // Header
         doc.setFontSize(18);
         doc.setTextColor(0, 70, 173);
         doc.text("DAILY BANKING DEPOSIT REPORT", 105, 15, { align: "center" });
@@ -133,20 +132,20 @@
             theme: 'striped'
         });
 
-        // Lubumbashi Table
+        // Katanga Table
         let nextY = doc.lastAutoTable.finalY + 15;
         doc.setTextColor(245, 124, 0);
-        doc.text("CITY: LUBUMBASHI", 14, nextY);
+        doc.text("CITY: KATANGA", 14, nextY);
 
-        let lubData = [];
-        document.querySelectorAll('#lubContainer .row').forEach(r => {
-            lubData.push([r.querySelector('.sName').value, "$" + r.querySelector('.sSales').value, "$" + r.querySelector('.sBank').value]);
+        let katData = [];
+        document.querySelectorAll('#katContainer .row').forEach(r => {
+            katData.push([r.querySelector('.sName').value, "$" + r.querySelector('.sSales').value, "$" + r.querySelector('.sBank').value]);
         });
 
         doc.autoTable({
             startY: nextY + 3,
             head: [['Shop Name', 'Sales', 'Banked']],
-            body: lubData,
+            body: katData,
             headStyles: { fillColor: [245, 124, 0] },
             theme: 'striped'
         });
@@ -170,8 +169,8 @@
             msg += `${r.querySelector('.sName').value}: S:$${r.querySelector('.sSales').value} / B:$${r.querySelector('.sBank').value}%0A`;
         });
 
-        msg += `%0A*--- LUBUMBASHI ---*%0A`;
-        document.querySelectorAll('#lubContainer .row').forEach(r => {
+        msg += `%0A*--- KATANGA ---*%0A`;
+        document.querySelectorAll('#katContainer .row').forEach(r => {
             msg += `${r.querySelector('.sName').value}: S:$${r.querySelector('.sSales').value} / B:$${r.querySelector('.sBank').value}%0A`;
         });
 
